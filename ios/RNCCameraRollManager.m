@@ -214,7 +214,8 @@ RCT_EXPORT_METHOD(getAlbums:(NSDictionary *)params
         [result addObject:@{
           @"title": [obj localizedTitle],
           @"count": @(assetsFetchResult.count),
-          @"type": fetchedAlbumType
+          @"type": fetchedAlbumType,
+          @"subType": @(obj.assetCollectionSubtype)
         }];
       }
     };
@@ -268,6 +269,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSString *const groupName = [RCTConvert NSString:params[@"groupName"]];
   NSString *const groupTypes = [[RCTConvert NSString:params[@"groupTypes"]] lowercaseString];
   NSString *const mediaType = [RCTConvert NSString:params[@"assetType"]];
+  NSUInteger const subType = [RCTConvert NSInteger:params[@"subType"]];
   NSUInteger const fromTime = [RCTConvert NSInteger:params[@"fromTime"]];
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
@@ -403,13 +405,12 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     } else {
       PHFetchResult<PHAssetCollection *> * assetCollectionFetchResult;
       if ([groupTypes isEqualToString:@"smartalbum"]) {
-        assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAny options:nil];
+        assetCollectionFetchResult = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:subType options:nil];
         [assetCollectionFetchResult enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull assetCollection, NSUInteger collectionIdx, BOOL * _Nonnull stopCollections) {
-          if ([assetCollection.localizedTitle isEqualToString:groupName]) {
             PHFetchResult<PHAsset *> *const assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:assetFetchOptions];
             currentCollectionName = [assetCollection localizedTitle];
             [assetsFetchResult enumerateObjectsUsingBlock:collectAsset];
-          }
+        
           *stopCollections = stopCollections_;
         }];
       } else {
