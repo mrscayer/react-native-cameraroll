@@ -308,6 +308,8 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   requestPhotoLibraryAccess(reject, ^{
     void (^collectAsset)(PHAsset*, NSUInteger, BOOL*) = ^(PHAsset * _Nonnull asset, NSUInteger assetIdx, BOOL * _Nonnull stopAssets) {
       NSString *const uri = [NSString stringWithFormat:@"ph://%@", [asset localIdentifier]];
+      NSString *const extension = [asset valueForKey:@"uniformTypeIdentifier"];
+     
       NSString *_Nullable originalFilename = NULL;
       PHAssetResource *_Nullable resource = NULL;
       NSNumber* fileSize = [NSNumber numberWithInt:0];
@@ -376,6 +378,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
         @"node": @{
           @"type": assetMediaTypeLabel, // TODO: switch to mimeType?
           @"group_name": currentCollectionName,
+          @"extension":extension,
           @"image": @{
               @"uri": uri,
               @"filename": (includeFilename && originalFilename ? originalFilename : [NSNull null]),
